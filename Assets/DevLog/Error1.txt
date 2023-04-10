@@ -1,0 +1,1 @@
+Error1: Animations + when attack // 'Player' AnimationEvent has no function name specified!
