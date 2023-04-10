@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class GoblinControl : MonoBehaviour
 {
+    public GoblinControl instance;
     [SerializeField]
     private Transform
             castPos;
@@ -11,7 +12,9 @@ public class GoblinControl : MonoBehaviour
     [SerializeField]
     private float 
             moveSpeed = 3f,
-            baseCastPosDistance;
+            baseCastPosDistance,
+            maxHealth,
+            currentHealth;
 
     private string 
             facingDirection;
@@ -26,12 +29,20 @@ public class GoblinControl : MonoBehaviour
     const string LEFT = "left";
     void Start()
     {
+        instance = this;
         facingDirection = RIGHT;
         baseScale = transform.localScale;
 
         aliveRb = GetComponent<Rigidbody2D>();
+        aliveAnimator = GetComponent<Animator>();
+
+        currentHealth = maxHealth;
     }
 
+    private void Update()
+    {
+        
+    }
     private void FixedUpdate()
     {
         
@@ -39,7 +50,7 @@ public class GoblinControl : MonoBehaviour
 
         if (IsHittingWall() || IsNearEdge())
         {
-            Debug.Log("touch");
+            //Debug.Log("touch");
             if (facingDirection == LEFT )
             {
                 ChangingDirection(RIGHT); 
@@ -80,6 +91,7 @@ public class GoblinControl : MonoBehaviour
         facingDirection = newDirection;
     } 
 
+    // Check wall
     private bool IsHittingWall()
     {
         bool isHit = false;
@@ -110,7 +122,7 @@ public class GoblinControl : MonoBehaviour
 
         return isHit;
     }
-
+    // Check edge
     private bool IsNearEdge()
     {
         bool isHitEdge = true;
@@ -134,4 +146,24 @@ public class GoblinControl : MonoBehaviour
 
         return isHitEdge;
     }
+
+    // Damage
+    private void GettingDamage(float damage)
+    {
+        currentHealth -= damage;
+
+        if (currentHealth < 0)
+        {
+            Destroy(this.gameObject);
+        }
+    }
+
+    // Enemy Focus to person
+    private bool Equal(Vector2 enemy, Vector2 player)
+    {
+        bool val = true;
+        
+
+        return val;
+    } 
 }

@@ -11,8 +11,9 @@ public class Coin : MonoBehaviour
     {
         if (player.gameObject.CompareTag("Player"))
         {
-            ScoreCoinOnBoard.instance.ChangeScore(coinValue);
-
+            // ScoreCoinOnBoard.instance.ChangeScore(coinValue);
+            //Destroy
+            Debug.Log("abc + 1");
         }
     }
 }
