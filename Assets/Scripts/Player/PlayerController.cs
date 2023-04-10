@@ -203,6 +203,9 @@ public class PlayerController : MonoBehaviour
             }  
         }
     }
+
+    
+
     // Gizmos 
 
     private void OnDrawGizmos()
@@ -210,4 +213,6 @@ public class PlayerController : MonoBehaviour
         
         Gizmos.DrawWireSphere(groundCheck.position, groundCheckRadius);
     }
+
+    
 }

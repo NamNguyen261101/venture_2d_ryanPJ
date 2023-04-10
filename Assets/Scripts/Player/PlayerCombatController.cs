@@ -86,6 +86,17 @@ public class PlayerCombatController : MonoBehaviour
         animator.SetBool("attack1", false);
     }
 
+    // Deal Damage 
+    private void DealDamage()
+    {
+
+    }
+
+
+    // Get Hit
+    
+
+
     private void OnDrawGizmos()
     {
         Gizmos.DrawWireSphere(attack1HitBoxPos.position, attack1Radius);
