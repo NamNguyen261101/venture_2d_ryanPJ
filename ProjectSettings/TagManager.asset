@@ -15,7 +15,7 @@ TagManager:
   - Ground
   - Damageable
   - Dead
-  - 
+  - Enemy
   - 
   - 
   - 
@@ -44,6 +44,9 @@ TagManager:
     locked: 0
   - name: BackGround
     uniqueID: 546969535
+    locked: 0
+  - name: ForeBackground
+    uniqueID: 1919274085
     locked: 0
   - name: Ground
     uniqueID: 1507022261
