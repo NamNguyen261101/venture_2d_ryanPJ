@@ -39,7 +39,7 @@ public class GoblinControl : MonoBehaviour
 
         if (IsHittingWall() || IsNearEdge())
         {
-            Debug.Log("touch");
+            // Debug.Log("touch");
             if (facingDirection == LEFT )
             {
                 ChangingDirection(RIGHT); 
@@ -134,4 +134,6 @@ public class GoblinControl : MonoBehaviour
 
         return isHitEdge;
     }
+
+
 }

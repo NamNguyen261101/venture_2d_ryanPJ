@@ -5,210 +5,308 @@ using UnityEngine;
 
 public class GoblinController : MonoBehaviour
 {
-    private enum GoblinState
-    {
-        Moving,
-        Knockback,
-        Dead
-    }
-    // AI state
-    private GoblinState currentState;
+    [SerializeField]
+    private Transform
+             castPos;
 
     [SerializeField]
     private float
-            groundCheckDistance,
-            wallCheckDistance,
-            movementSpeed,
-            maxHealth,
-            knockbackDuration;
-    [SerializeField]
-    private Transform
-            groundCheck,
-            wallCheck;
-    [SerializeField]
-    private LayerMask
-            whatIsGround; // same for player
-    [SerializeField]
-    private Vector2
-            knockbackSpeed;
+            moveSpeed = 3f,
+            baseCastPosDistance;
 
-    private int 
-            facingDirection,
-            damageDirection;
+    private string
+            facingDirection;
 
-    private float 
-            currentHealth,
-            knockbackStartTime;
+    private Rigidbody2D
+            aliveRb;
+    private Animator
+            aliveAnimator;
+    private Vector3
+            baseScale;
+    const string RIGHT = "right";
+    const string LEFT = "left";
 
-    private Vector2 movement;
+    // Ray cast
+     private RaycastHit2D hit;
+     private Transform target;
+    [SerializeField] private Transform rayCast;
+    [SerializeField] private LayerMask raycastMask;
 
-    private bool 
-            groundDetected,
-            wallDetected;
+    [SerializeField] private float rayCastLength;
 
-    private GameObject alive; // var to contain all obj -> by finding
-    private Rigidbody2D aliveRb;
-    private Animator aliveAnimator;
+    private float distance; // store the distance b/w enemy and player
+    private bool attackMode;
 
-    private void Start()
+    private bool cooling; // Check if Enemy is cooling after attack
+    private float intTimer;
+    [SerializeField] private float attackDistance; // Min distance for attack
+    [SerializeField] private float timer; // Time cooldown for attack
+    [SerializeField] private Transform leftLimit;
+    [SerializeField] private Transform rightLimit;
+    public bool inRange; // Check if player is in range
+    void Start()
     {
-        alive = transform.Find("Alive").gameObject;
-        aliveRb = alive.GetComponent<Rigidbody2D>();
-        aliveAnimator = alive.GetComponent<Animator>();
+        facingDirection = RIGHT;
+        baseScale = transform.localScale;
 
-        facingDirection = 1; // Set default facing
+        aliveRb = GetComponent<Rigidbody2D>();
     }
+
+    private void FixedUpdate()
+    {
+
+        GoblinApplyMovement();
+
+        if (IsHittingWall() || IsNearEdge())
+        {
+            // Debug.Log("touch");
+            if (facingDirection == LEFT)
+            {
+                ChangingDirection(RIGHT);
+            }
+            else if (facingDirection == RIGHT)
+            {
+                ChangingDirection(LEFT);
+            }
+        }
+    }
+
     private void Update()
     {
-        switch (currentState)
+        if (!InsideofLimits() && !inRange && !aliveAnimator.GetCurrentAnimatorStateInfo(0).IsName("Enemy_attack"))
         {
-            case GoblinState.Moving:
-                UpdateMovingState();
-                break;
-            case GoblinState.Knockback:
-                UpdateKnockbackState();
-                break;
-            case GoblinState.Dead:
-                UpdateDeadState();
-                break;
+            SelectTarget();
         }
-    }
-    // Moving State
-    private void EnterMovingState()
-    {
 
-    }
-
-    private void UpdateMovingState()
-    {
-        groundDetected = Physics2D.Raycast(groundCheck.position, Vector2.down, groundCheckDistance, whatIsGround);
-        wallDetected = Physics2D.Raycast(wallCheck.position, transform.right, wallCheckDistance, whatIsGround);
-
-        if (!groundDetected || wallDetected)
+        if (inRange)
         {
-            // Flip enemy
-            Flip();
-        } else
+            hit = Physics2D.Raycast(rayCast.position, transform.right, rayCastLength, raycastMask);
+            RayCastDebugger();
+        }
+        // When player is detected
+        if (hit.collider != null)
         {
-            movement.Set(movementSpeed * facingDirection, aliveRb.velocity.y);
-            aliveRb.velocity = movement;
+            EnemyLogic();
+        }
+        else if (hit.collider == null)
+        {
+            inRange = false;
+        }
+
+        if (inRange == false)
+        {
+            // anim.SetBool("moving", false);
+            StopAttack();
+            //EnemyLogic();
         }
     }
 
-    private void ExitMovingState()
-    {
 
-    }
-    // Knockback State
-    private void EnterKnockbackState()
-    {
-        knockbackStartTime = Time.time;
-        movement.Set(knockbackSpeed.x * damageDirection, knockbackSpeed.y);
-        aliveRb.velocity = movement;
-        aliveAnimator.SetBool("isKnockback", true);
 
-    }
-
-    private void UpdateKnockbackState()
+    // Moving 
+    private void GoblinApplyMovement()
     {
-        if (Time.time >= knockbackStartTime + knockbackDuration)
+        float velocityX = moveSpeed;
+
+        if (facingDirection == LEFT) // left side
         {
-            SwitchState(GoblinState.Moving);
+            velocityX = -moveSpeed;
+        }
+        aliveRb.velocity = new Vector2(velocityX, aliveRb.velocity.y);
+    }
+
+    // Flip
+    private void ChangingDirection(string newDirection)
+    {
+        Vector3 newScale = baseScale;
+
+        if (newDirection == LEFT)
+        {
+            newScale.x = -baseScale.x;
+        }
+        else if (newDirection == RIGHT)
+        {
+            newScale.x = baseScale.x;
+        }
+
+        transform.localScale = newScale;
+
+        facingDirection = newDirection;
+    }
+
+    private bool IsHittingWall()
+    {
+        bool isHit = false;
+
+        float castDist;
+
+        // Define cast distance left or right
+        if (facingDirection == LEFT)
+        {
+            castDist = -baseCastPosDistance;
+        }
+        else
+        {
+            castDist = baseCastPosDistance;
+        }
+        // determine target based by cast distance
+        Vector3 targetPos = castPos.position;
+        targetPos.x += castDist;
+
+        Debug.DrawLine(castPos.position, targetPos, Color.red);
+
+        if (Physics2D.Linecast(castPos.position, targetPos, 1 << LayerMask.NameToLayer("Ground"))) // 1 << LayerMask.NameToLayer
+        {
+            isHit = true;
+        }
+        else
+        {
+            isHit = false;
+        }
+
+        return isHit;
+    }
+
+    private bool IsNearEdge()
+    {
+        bool isHitEdge = true;
+
+        float castDist = baseCastPosDistance;
+
+        // determine target based by cast distance
+        Vector3 targetPos = castPos.position;
+        targetPos.y -= castDist;
+
+        Debug.DrawLine(castPos.position, targetPos, Color.blue);
+
+        if (Physics2D.Linecast(castPos.position, targetPos, 1 << LayerMask.NameToLayer("Ground"))) // 1 << LayerMask.NameToLayer
+        {
+            isHitEdge = false;
+        }
+        else
+        {
+            isHitEdge = true;
+        }
+
+        return isHitEdge;
+    }
+
+
+        private void OnTriggerEnter2D(Collider2D trig)
+        {
+            if (trig.gameObject.tag == "Player")
+            {
+                target = trig.transform;
+                inRange = true;
+                Flip();
+            }
+        }
+
+
+    private void RayCastDebugger() 
+    {
+          if (distance > attackDistance) 
+           {
+               Debug.DrawRay(rayCast.position, transform.right * rayCastLength, Color.red);
+           } else if (distance < attackDistance) {
+               Debug.DrawRay(rayCast.position, transform.right * rayCastLength, Color.green);
+          }
+           
+     }
+
+    // Enemy Loic
+    private void EnemyLogic()
+    {
+        // distance btween enemy and player
+        distance = Vector2.Distance(transform.position, target.position);
+
+        if (distance > attackDistance)
+        {
+            StopAttack();
+        }
+        else if (attackDistance >= distance && cooling == false)
+        {
+            Attack();
+        }
+
+        if (cooling)
+        {
+            Cooldown();
+            aliveAnimator.SetBool("isAttack", false);
         }
     }
 
-    private void ExitKnockbackState()
+    // Attack 
+    private void Attack()
     {
-        aliveAnimator.SetBool("isKnockback", false);
+        timer = intTimer; // Reset timer when Player enter attack range
+        attackMode = true; // To check if enemy can still attack or not
+
+        aliveAnimator.SetBool("moving", false);
+       // aliveAnimator.SetBool("isAttack", true);
     }
-
-    // Dead State
-    private void EnterDeadState()
+    // Cooldown attack
+    private void Cooldown()
     {
-        // Spawn chunks and blood
-        Destroy(gameObject);
-    }
+        timer -= Time.deltaTime;
 
-    private void UpdateDeadState()
-    {
-
-    }
-
-    private void ExitDeadState()
-    {
-
-    }
-
-    //
-
-    // Switch state
-    private void SwitchState(GoblinState state)
-    {
-        switch (currentState)
+        if (timer <= 0 && cooling && attackMode)
         {
-            case GoblinState.Moving:
-                ExitMovingState();
-                break;
-            case GoblinState.Knockback:
-                ExitKnockbackState();
-                break;
-            case GoblinState.Dead:
-                ExitDeadState();
-                break;
-        }
-
-        switch (state)
-        {
-            case GoblinState.Moving:
-                EnterMovingState();
-                break;
-            case GoblinState.Knockback:
-                EnterKnockbackState();
-                break;
-            case GoblinState.Dead:
-                EnterDeadState();
-                break;
-        }
-
-        currentState = state;
-    }
-
-    // Flip Direction
-    private void Flip()
-    {
-        facingDirection *= -1;
-        alive.transform.Rotate(0.0f, 180.0f, 0.0f);
-
-    }
-
-    // Damage Function
-    private void Damage(float[] attackDetails) // send damg + x location of the player doing the attack 
-    {
-        currentHealth -= attackDetails[0]; // always want send damg in first index
-
-        // x position = second index of array
-        if (attackDetails[1] > alive.transform.position.x)
-        {
-            damageDirection = -1;
-        } else
-        {
-            damageDirection = 1;
-        }
-
-        // Hit particle
-        if (currentHealth > 0.0f)
-        {
-            SwitchState(GoblinState.Knockback);
-        } else if (currentHealth < 0.0f)
-        {
-            SwitchState(GoblinState.Dead);
+            cooling = false;
+            timer = intTimer;
         }
     }
-
-    // Draw Gizmo
-    private void OnDrawGizmos()
+    // Stop Attack
+    private void StopAttack()
     {
-        Gizmos.DrawLine(groundCheck.position, new Vector2(groundCheck.position.x, groundCheck.position.y - groundCheckDistance));
-        Gizmos.DrawLine(wallCheck.position, new Vector2(wallCheck.position.x + wallCheckDistance, wallCheck.position.y));
+        cooling = false;
+        attackMode = false;
+        // aliveAnimator.SetBool("isAttack", false);
+
+    }
+
+    // Trigger to Cooling animation attack 
+    private void TriggerColling()
+    {
+        cooling = true;
+    }
+
+    public void SelectTarget()
+    {
+        float distanceToLeft = Vector2.Distance(transform.position, leftLimit.position); // cal distance enemy from left boundary
+        float distanceToRight = Vector2.Distance(transform.position, rightLimit.position);
+
+        if (distanceToLeft > distanceToRight)
+        {
+            target = leftLimit;
+        }
+        else
+        {
+            target = rightLimit;
+        }
+
+        Flip();
+    }
+
+    // Flip
+    public void Flip()
+    {
+        Vector3 rotation = transform.eulerAngles;
+        if (transform.position.x > target.position.x)
+        {
+            rotation.y = 180f;
+        }
+        else
+        {
+            rotation.y = 0f;
+        }
+
+        transform.eulerAngles = rotation;
+    }
+
+    // Limits Range 
+    private bool InsideofLimits()
+    {
+        return transform.position.x > leftLimit.position.x && transform.position.x < rightLimit.position.x; // if match will be true
     }
 }
