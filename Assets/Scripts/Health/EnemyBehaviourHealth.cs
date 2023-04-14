@@ -4,24 +4,33 @@ using UnityEngine;
 
 public class EnemyBehaviourHealth : MonoBehaviour
 {
-    [SerializeField] private float hitPoints;
-    [SerializeField] private float maxHealth;
-    [SerializeField] private HealthBarAll healthBar;
+    private float maxHealth = 10;
+    private float currentHealth;
+    public HealthBarAll healthBar;
 
-    public Animator anim;
+    private Animator anim;
     private bool isHurting;
     private float timerToDie = 1f;
     private void Start()
     {
         
-        hitPoints = maxHealth;
-        healthBar.SetHealth(hitPoints, maxHealth);
+       anim = GetComponent<Animator>();
+
+        if (Input.GetKeyDown(KeyCode.O))
+        {
+            TakeHit(2);
+        }
     }
 
     public void TakeHit(float damaged)
     {
-        hitPoints -= damaged;
-       if (hitPoints <= 0)
+        currentHealth -= damaged;
+        if (currentHealth > 0 )
+        {
+            anim.SetTrigger("isHurting");
+            healthBar.SetHealth(currentHealth);
+        }
+        if (currentHealth <= 0)
         {
             Die();
         }

@@ -6,22 +6,24 @@ using UnityEngine.UI;
 public class HealthBarAll : MonoBehaviour
 {
     [SerializeField] private Slider slider;
-    private Color low;
-    private Color high;
-    private Vector3 offset;
-
-
-    public void SetHealth(float health, float maxHealth)
+    [SerializeField] private Gradient gradient;
+    [SerializeField] private Image fill;
+    public void SetHealth(float health)
     {
-        slider.gameObject.SetActive(health < maxHealth );
         slider.value = health;
-        slider.maxValue = maxHealth;
 
-        slider.fillRect.GetComponent<Image>().color = Color.Lerp(low, high, slider.normalizedValue);
+        fill.color = gradient.Evaluate(slider.normalizedValue);
+    }
+
+    public void SetMaxHealth(float health)
+    {
+        slider.maxValue = health;
+        slider.value = health;
+
+        fill.color = gradient.Evaluate(1f);
     }
     private void Update()
     {
-        slider.transform.position = Camera.main.WorldToScreenPoint(transform.parent.position + offset);
 
     }
 }

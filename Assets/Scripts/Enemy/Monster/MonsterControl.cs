@@ -15,7 +15,7 @@ public class MonsterControl : MonoBehaviour
     private LayerMask playerLayer;
     
     private Animator anim;
-    private Health playerHealth;
+    private PlayerBehaviour playerHealth;
 
     private MonsterMoving monsterMoving;
     private void Awake()
@@ -31,12 +31,17 @@ public class MonsterControl : MonoBehaviour
         // Attack when player in sight
         if (PlayerInsight())
         {
+            monsterMoving.Active= false;
             if (cooldownTimer >= attackCooldown)
             {
                 // attack
                 cooldownTimer = 0;
                 anim.SetTrigger("attack");
             }
+        }
+        else
+        {
+            monsterMoving.Active= true;
         }
 
        /* if (monsterMoving != null)
@@ -53,7 +58,7 @@ public class MonsterControl : MonoBehaviour
                                              0 ,Vector2.left, 0, playerLayer);
         if (hit.collider != null)
         {
-            playerHealth = hit.transform.GetComponent<Health>();
+            playerHealth = hit.transform.GetComponent<PlayerBehaviour>();
         }
 
 
@@ -65,7 +70,7 @@ public class MonsterControl : MonoBehaviour
         // If player still in range damage him
         if (PlayerInsight())
         {
-            playerHealth.TakeDamage(damage);
+            playerHealth.PlayerTakeDmg(damage);
         }
     }
 

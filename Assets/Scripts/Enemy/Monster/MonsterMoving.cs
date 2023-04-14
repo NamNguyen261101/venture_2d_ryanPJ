@@ -24,6 +24,7 @@ public class MonsterMoving : MonoBehaviour
             baseScale;
     const string RIGHT = "right";
     const string LEFT = "left";
+    public bool Active{ get; set; }
 
     [SerializeField] private float idleDuration; // how much time when he reach to the edge
     private float idleTimer;
@@ -38,8 +39,11 @@ public class MonsterMoving : MonoBehaviour
 
     }
 
+
     public void FixedUpdate()
     {
+        if (!Active)
+            return;
 
         GoblinApplyMovement();
 

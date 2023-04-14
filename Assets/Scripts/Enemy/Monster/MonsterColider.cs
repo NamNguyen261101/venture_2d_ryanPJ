@@ -4,26 +4,15 @@ using UnityEngine;
 
 public class MonsterColider : MonoBehaviour
 {
-    private float getDamageFromPlayer = 1;
-    /*private void OnCollisionEnter2D (Collider2D collision)
-    {
-        if (collision.CompareTag("Enemy"))
-        {
-            Debug.Log("-damage");
-            collision.GetComponent<Health>().TakeDamage(getDamageFromPlayer); ;
-        }
-    }*/
+    [SerializeField] private float getDamageFromPlayer = 1;
+    public EnemyBehaviourHealth health;
 
-    private void OnCollisionEnter2D (Collision2D collision)
+    private void OnTriggerEnter2D(Collider2D collision)
     {
-        var enemy = collision.collider.GetComponent<EnemyBehaviourHealth>();
-        
-        if (enemy)
+        if (collision.tag == "Player")
         {
-            enemy.TakeHit(getDamageFromPlayer);
+           health.TakeHit(getDamageFromPlayer);
         }
-
-        /*Destroy(enemy);*/
     }
 
 

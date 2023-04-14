@@ -1,93 +1,68 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 
 public class Health : MonoBehaviour
 {
-    [SerializeField] private float startingHealth;
-    private float currentHealth;
-    private Animator anim;
-    private bool dead;
-    private bool isHurting;
-    [Header("iframes")]
-    [SerializeField] private float iframeDuration;
-    [SerializeField] private int numberOfFlashes;
-    private SpriteRenderer spriteRenderer;
+    [SerializeField]
+    private float maxHp = 100;
+    private float hp;
 
-
-    public float CurrentHealth
+    private float MaxHp => maxHp;
+    public float Hp
     {
-        get { return currentHealth; }
-        private set { currentHealth = value; }
+        get { return hp; }
+        private set
+        {
+            var isDamage = value < hp;
+            hp = Mathf.Clamp(value, 0, maxHp);
+
+            if (isDamage)
+            {
+                Damaged?.Invoke(hp);
+            } else
+            {
+                Healed?.Invoke(hp);
+            }
+            if (hp <= 0 )
+            {
+                Die?.Invoke();
+            }
+        }
     }
+    public UnityEvent<float> Healed;
+    public UnityEvent<float> Damaged;
+    public UnityEvent Die;
 
     private void Awake()
     {
-        currentHealth = startingHealth;
-        anim = GetComponent<Animator>();
-        spriteRenderer= GetComponent<SpriteRenderer>();
+        hp = maxHp;
     }
 
-   
-    public void TakeDamage(float damage)
+    public void Damage(float damage)
     {
-        currentHealth -= Mathf.Clamp(currentHealth - damage, damage, startingHealth);
+        hp -= damage;
+    }
+    
 
-        if (currentHealth > 0)
-        {
-            Debug.Log("Still Hurt");
-            // player hurt
-            anim.SetTrigger("hurt");
-           
-        } else if (currentHealth < 0) 
-        {
-            if(!dead)
-            {
-                // player dead
-                //Debug.Log("Dead");
-                anim.SetTrigger("die");
-                // Player
-                if (GetComponent<PlayerController>() != null)
-                {
-                    GetComponent<PlayerController>().enabled = false;
-                }
-                // Enemy
-                // Monster
-                if (GetComponent<EnemyPatrol>() != null)
-                {
-                    GetComponentInParent<EnemyPatrol>().enabled = false;
-                    
-                }
-                if (GetComponent<MonsterControl>() != null)
-                {
-                    GetComponent<MonsterControl>().enabled = false;
-                }
-                
-            }  
-        }
+    public void Heal(float amount) 
+    {
+        Hp += amount;
     }
 
-    public void AddHealth(float value)
+    public void HealFull()
     {
-        currentHealth = Mathf.Clamp(currentHealth + value, 0, startingHealth);
+        Hp = maxHp;
     }
 
-
-
-
-    /*private IEnumerator Invunerability()
+    public void Kill()
     {
-        Physics2D.IgnoreLayerCollision(3,9, true);
+        Hp = 0;
+    }
 
-        // invunerabity duration
-        for (int i = 0;i < numberOfFlashes; i++)
-        {
-            spriteRenderer.color = new Color(1, 0, 0, 0.5f);
-            yield return new WaitForSeconds( iframeDuration / (numberOfFlashes *1));
-            spriteRenderer.color = Color.white;
-            yield return new WaitForSeconds( iframeDuration / (numberOfFlashes * 1));
-        }
-
-        Physics2D.IgnoreLayerCollision(3, 9, false);
-    } */
+    public void Adjust(float value)
+    {
+        Hp = value;
+    }
 }

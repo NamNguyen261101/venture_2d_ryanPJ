@@ -20,6 +20,9 @@ public class PlayerCombatController : MonoBehaviour
 
     private Animator animator;
 
+    [SerializeField] private float damageEnemy;
+    [SerializeField] private EnemyBehaviourHealth enemyHealth;
+
     private void Start()
     {
         animator = GetComponent<Animator>();
@@ -90,4 +93,12 @@ public class PlayerCombatController : MonoBehaviour
     {
         Gizmos.DrawWireSphere(attack1HitBoxPos.position, attack1Radius);
     }
+
+    /*private void OnTriggerEnter2D(Collider2D collision)
+    {
+        if (collision.tag == "Enemy")
+        {
+            enemyHealth.TakeHit(damageEnemy);
+        }
+    }*/
 }

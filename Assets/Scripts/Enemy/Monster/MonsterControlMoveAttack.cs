@@ -19,10 +19,10 @@ public class MonsterControlMoveAttack : MonoBehaviour
     {
         if (!monsterControl.PlayerInsight() && moving == true)
         {           
-            monsterControl.Update();
+           
         } else
         {
-            monsterMoving.FixedUpdate();
+            
         }
     }
 

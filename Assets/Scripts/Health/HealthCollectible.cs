@@ -10,7 +10,7 @@ public class HealthCollectible : MonoBehaviour
     {
         if (collision.CompareTag("Player"))
         {
-            collision.GetComponent<Health>().AddHealth(healthValue); 
+            collision.GetComponent<PlayerBehaviour>().PlayerHeal(healthValue);
             gameObject.SetActive(false);
         }
     }
