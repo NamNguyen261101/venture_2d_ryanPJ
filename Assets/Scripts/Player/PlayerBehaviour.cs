@@ -17,7 +17,10 @@ public class PlayerBehaviour : MonoBehaviour
     }
     void Update()
     {
-
+        if (Input.GetKeyDown(KeyCode.O))
+        {
+            PlayerTakeDmg(2);
+        }
     }
 
     public void PlayerTakeDmg(float dmg)
