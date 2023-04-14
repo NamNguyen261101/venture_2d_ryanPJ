@@ -22,7 +22,8 @@ public class PlayerBehaviour : MonoBehaviour
 
     public void PlayerTakeDmg(float dmg)
     {
-        currentHealth = Mathf.Clamp(currentHealth - dmg, dmg, maxHealth);
+        // currentHealth = Mathf.Clamp(currentHealth - dmg, dmg, maxHealth);
+        currentHealth -= dmg;
         if (currentHealth > 0 )
         {
             Debug.Log("Still Hurt");
