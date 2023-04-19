@@ -16,7 +16,7 @@ public class EnemyBehaviourHealth : MonoBehaviour
         
        anim = GetComponent<Animator>();
 
-        if (Input.GetKeyDown(KeyCode.O))
+        if (Input.GetKeyDown(KeyCode.P))
         {
             TakeHit(2);
         }
@@ -27,17 +27,17 @@ public class EnemyBehaviourHealth : MonoBehaviour
         currentHealth -= damaged;
         if (currentHealth > 0 )
         {
-            anim.SetTrigger("isHurting");
+            // anim.SetTrigger("isHurting");
             healthBar.SetHealth(currentHealth);
         }
-        if (currentHealth <= 0)
+        if (currentHealth < 0)
         {
             Die();
         }
     }
     public void Die()
     {
-        anim.SetTrigger("Die");
+        // anim.SetTrigger("Die");
         Destroy(gameObject, timerToDie);
     }
 }

@@ -22,8 +22,5 @@ public class HealthBarAll : MonoBehaviour
 
         fill.color = gradient.Evaluate(1f);
     }
-    private void Update()
-    {
-
-    }
+    
 }
