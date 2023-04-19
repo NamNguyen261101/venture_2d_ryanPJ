@@ -44,7 +44,10 @@ public class MonsterControl : MonoBehaviour
             monsterMoving.Active= true;
         }
 
-        
+       /* if (monsterMoving != null)
+        {
+            monsterMoving.enabled = !PlayerInsight(); // check if not insight to change direction
+        }*/
 
     }
     // Insight view
