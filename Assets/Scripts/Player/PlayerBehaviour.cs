@@ -17,12 +17,16 @@ public class PlayerBehaviour : MonoBehaviour
     }
     void Update()
     {
-
+        if (Input.GetKeyDown(KeyCode.O))
+        {
+            PlayerTakeDmg(2);
+        }
     }
 
     public void PlayerTakeDmg(float dmg)
     {
-        currentHealth = Mathf.Clamp(currentHealth - dmg, dmg, maxHealth);
+        // currentHealth = Mathf.Clamp(currentHealth - dmg, dmg, maxHealth);
+        currentHealth -= dmg;
         if (currentHealth > 0 )
         {
             Debug.Log("Still Hurt");
